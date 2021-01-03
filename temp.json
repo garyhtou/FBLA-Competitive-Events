@@ -1,0 +1,60 @@
+{
+	"competitiveEvents": {
+		"objectiveTestCat": {
+			"overview": "These events consist of a 60‑minute test administered during the National Leadership Conference (NLC).",
+			"nlcReg": "Participants must be registered for the NLC and pay the national conference registration fee to participate in competitive events",
+			"eligibility": "Each state may submit four entries. Competitors must have paid FBLA national and state dues by 11:59 p.m. Eastern Time on March 1 of the current school year.",
+			"friendlyName": "Object Test",
+			"finals": "",
+			"guidelines": {
+				"objectiveTest": {
+					"friendlyName": "Objective Test Guidelines",
+					"0": "No materials may be brought to the testing site.",
+					"1": "No calculators may be brought into the testing site; calculators will be provided.",
+					"2": "Electronic devices must be turned off and out of sight.",
+					"3": "Bring a writing instrument."
+				}
+			},
+			"events": {
+				"accountingI": {
+					"friendlyName": "Accounting I",
+					"path": "accounting-i",
+					"participantType": "I",
+					"note": "Participants must not have had more than two (2) semesters or one (1) semester equivalent to a full year in block scheduling in high school accounting instruction",
+					"competencies": {
+						"objectiveTest": {
+							"friendlyName": "Object Test Competencies",
+							"A": {
+								"friendlyName": "Journalizing",
+								"minimum": 20,
+								"tasks": {
+									"0": "Prepare a multi-column journal for recording data.",
+									"1": "Record transactions such as accounts receivables and accounts payables in appropriate journals.",
+									"2": "Journalize or record business transactions in a journal (e.g., cash receipts, cash payments, purchases, sales, and general). ",
+									"3": "Journalize adjusting and closing entries for a business.",
+									"4": "Prove and rule journals."
+								}
+							},
+							"B": {
+								"friendlyName": "Account Classification",
+								"minimum": 15,
+								"tasks": {
+									"0": "Evaluate assets and liabilities to determine their function in an accounting system.",
+									"1": "Identify asset accounts.",
+									"2": "Identify liability accounts.",
+									"3": "Identify capital or owner’s equity accounts.",
+									"4": "Create a chart of accounts to reflect business needs and update as needed.",
+									"5": "Differentiate fixed assets, intangible assets, and current assets.",
+									"6": "Differentiate between current and long-term liabilities."
+								}
+							},
+							"C": {
+								"friendlyName": "THIS STILL NEEDS TO BE COMPLETED"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

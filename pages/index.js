@@ -1,65 +1,123 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import Head from "next/head";
+import Link from "next/link";
+import styles from "../styles/Home.module.css";
+import {
+	Typography,
+	Link as MuiLink,
+	makeStyles,
+	Table,
+	TableBody,
+	TableCell,
+	TableContainer,
+	TableHead,
+	TableRow,
+	Paper,
+} from "@material-ui/core";
+import firebase from "../utils/firebase";
 
-export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+const useStyles = makeStyles({
+	table: {
+		minWidth: 650,
+	},
+});
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+function createData(name, friendlyName, type, category, path) {
+	let nameElement = (
+		<Link href={"/" + path} passHref>
+			<MuiLink variant="body1" style={{ cursor: "pointer" }}>
+				{friendlyName}
+			</MuiLink>
+		</Link>
+	);
+	return { name, nameElement, type, category, path };
+}
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+export default function Home({ events }) {
+	const classes = useStyles();
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+	const rows = [];
+	events.map((event) => {
+		rows.push(
+			createData(
+				event.name,
+				event.friendlyName,
+				event.type,
+				event.category,
+				event.path
+			)
+		);
+	});
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+	return (
+		<>
+			<h1>Home</h1>
+			<TableContainer component={Paper}>
+				<Table className={classes.table} aria-label="simple table">
+					<TableHead>
+						<TableRow>
+							<TableCell>Event Name</TableCell>
+							<TableCell align="right">Type</TableCell>
+							<TableCell align="right">Category</TableCell>
+						</TableRow>
+					</TableHead>
+					<TableBody>
+						{rows.map((row) => (
+							<TableRow key={row.name}>
+								<TableCell component="th" scope="row">
+									{row.nameElement}
+								</TableCell>
+								<TableCell align="right">{row.type}</TableCell>
+								<TableCell align="right">{row.category}</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</TableContainer>
+		</>
+	);
+}
 
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
+export async function getServerSideProps(context) {
+	const snapshot = await firebase
+		.database()
+		.ref("competitiveEvents")
+		.once("value");
 
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
+	var events = [];
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+	for (let category of Object.keys(snapshot.val())) {
+		let categoryObj = snapshot.val()[category];
+		for (let event of Object.keys(categoryObj.events)) {
+			let eventObj = categoryObj.events[event];
+
+			let participantType;
+			switch (eventObj.participantType.toUpperCase()) {
+				case "I":
+					participantType = "Individual";
+					break;
+				case "T":
+					participantType = "Team";
+					break;
+				case "C":
+					participantType = "Chapter";
+					break;
+				default:
+					participantType = "";
+			}
+
+			events.push({
+				name: event,
+				friendlyName: eventObj.friendlyName || event,
+				type: participantType,
+				category: categoryObj.friendlyName || category,
+				path: eventObj.path || event,
+			});
+		}
+	}
+
+	// console.log(events);
+
+	return {
+		props: { events },
+	};
 }
