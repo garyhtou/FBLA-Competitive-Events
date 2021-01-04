@@ -12,8 +12,11 @@ import {
 	TableHead,
 	TableRow,
 	Paper,
+	Chip,
+	Grid,
 } from "@material-ui/core";
 import firebase from "../utils/firebase";
+import parseParticipantType from "../helper/parseParticipantType";
 
 const useStyles = makeStyles({
 	table: {
@@ -21,15 +24,30 @@ const useStyles = makeStyles({
 	},
 });
 
-function createData(name, friendlyName, type, category, path) {
+function createData(name, friendlyName, type, category) {
 	let nameElement = (
-		<Link href={"/" + path} passHref>
+		<Link href={"/" + name} passHref>
 			<MuiLink variant="body1" style={{ cursor: "pointer" }}>
 				{friendlyName}
 			</MuiLink>
 		</Link>
 	);
-	return { name, nameElement, type, category, path };
+	let displayType = [];
+	displayType.push(
+		type.map((currentType) => (
+			<Grid key={currentType} item>
+				<Chip label={currentType} />
+			</Grid>
+		))
+	);
+	displayType = (
+		<Grid container spacing={1} justify="flex-end">
+			{displayType}
+		</Grid>
+	);
+	console.log(displayType);
+
+	return { name, nameElement, type: displayType, category };
 }
 
 export default function Home({ events }) {
@@ -38,13 +56,7 @@ export default function Home({ events }) {
 	const rows = [];
 	events.map((event) => {
 		rows.push(
-			createData(
-				event.name,
-				event.friendlyName,
-				event.type,
-				event.category,
-				event.path
-			)
+			createData(event.name, event.friendlyName, event.type, event.category)
 		);
 	});
 
@@ -83,36 +95,27 @@ export async function getServerSideProps(context) {
 		.ref("competitiveEvents")
 		.once("value");
 
+	const snapshotEvents = snapshot.val().events;
+	const snapshotCategories = snapshot.val().categories;
+
 	var events = [];
 
-	for (let category of Object.keys(snapshot.val())) {
-		let categoryObj = snapshot.val()[category];
-		for (let event of Object.keys(categoryObj.events)) {
-			let eventObj = categoryObj.events[event];
+	for (let event of Object.keys(snapshotEvents)) {
+		let eventObj = snapshotEvents[event];
 
-			let participantType;
-			switch (eventObj.participantType.toUpperCase()) {
-				case "I":
-					participantType = "Individual";
-					break;
-				case "T":
-					participantType = "Team";
-					break;
-				case "C":
-					participantType = "Chapter";
-					break;
-				default:
-					participantType = "";
-			}
+		let participantType = parseParticipantType(eventObj.participantType);
+		let eventCategory =
+			snapshotCategories[eventObj.category].friendlyName ||
+			eventObj.category ||
+			eventObj.friendlyName ||
+			event;
 
-			events.push({
-				name: event,
-				friendlyName: eventObj.friendlyName || event,
-				type: participantType,
-				category: categoryObj.friendlyName || category,
-				path: eventObj.path || event,
-			});
-		}
+		events.push({
+			name: event,
+			friendlyName: eventObj.friendlyName || event,
+			type: participantType,
+			category: eventCategory,
+		});
 	}
 
 	// console.log(events);
