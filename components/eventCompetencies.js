@@ -19,9 +19,8 @@ const useStyles = makeStyles({
 	competencySectionTitle: {
 		fontWeight: "bold",
 	},
-	competencySectionMinimum: {
-		flexGrow: 2,
-		textAlign: "right",
+	competencySectionTitleGrow: {
+		flexGrow: 1,
 	},
 });
 
@@ -95,21 +94,20 @@ export default function EventCompetencies({ event, category }) {
 						{type.sections.map((section) => (
 							<Accordion key={section.key}>
 								<AccordionSummary expandIcon={<ExpandMore />}>
-									<Typography>
+									<Typography className={classes.competencySectionTitleGrow}>
 										<Box className={classes.competencySectionTitle}>
 											{section.title}
 										</Box>
 									</Typography>
-									<Box className={classes.competencySectionMinimum}>
+
+									<div>
 										<Typography>
-											<Box>
-												{typeof section.minimum !== "undefined" &&
-												section.minimum !== ""
-													? "Minimum: " + section.minimum
-													: null}
-											</Box>
+											{typeof section.minimum !== "undefined" &&
+											section.minimum !== ""
+												? "Minimum: " + section.minimum
+												: null}
 										</Typography>
-									</Box>
+									</div>
 								</AccordionSummary>
 								<AccordionDetails>
 									{section.tasks.length > 1 ? (

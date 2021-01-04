@@ -7,6 +7,7 @@ import {
 	Grid,
 	Card,
 	CardContent,
+	Paper,
 } from "@material-ui/core";
 import firebase from "../utils/firebase";
 import EventHeader from "../components/eventHeader";
@@ -15,6 +16,7 @@ import parseParticipantType from "../helper/parseParticipantType";
 import EventGuidelines from "../components/eventGuidelines";
 import EventCompetencies from "../components/eventCompetencies";
 import EventTopicCase from "../components/eventTopicCase";
+import EventFiles from "../components/eventFiles";
 
 export default function Event({ event, category }) {
 	return (
@@ -37,6 +39,8 @@ export default function Event({ event, category }) {
 					<EventCompetencies event={event} category={category} />
 
 					<EventGuidelines event={event} category={category} />
+
+					<EventFiles event={event} category={category} />
 				</Grid>
 				<Grid item md={4}>
 					<EventSidebar event={event} category={category} />
