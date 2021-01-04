@@ -5,7 +5,9 @@ import {
 	Chip,
 	Grid,
 	Box,
+	Tooltip,
 } from "@material-ui/core";
+import customStrings from "../helper/customStrings";
 
 export default function EventHeader({ event, category }) {
 	return (
@@ -33,7 +35,13 @@ export default function EventHeader({ event, category }) {
 						<Grid container spacing={1}>
 							{event.participantType.map((type) => (
 								<Grid key={type} item>
-									<Chip label={type} size="small" />
+									<Tooltip
+										title={
+											customStrings.participantType[type.toLowerCase()] || ""
+										}
+									>
+										<Chip label={type} size="small" />
+									</Tooltip>
 								</Grid>
 							))}
 						</Grid>

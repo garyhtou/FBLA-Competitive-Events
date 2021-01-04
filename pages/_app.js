@@ -70,6 +70,12 @@ function MyApp({ Component, pageProps }) {
 					name="viewport"
 					content="minimum-scale=1, initial-scale=1, width=device-width"
 				/>
+				<link rel="icon" type="image/png" href="/hazenfbla-square.png"></link>
+				<title>FBLA Competitive Events</title>
+				<meta
+					name="description"
+					content="Easily view all of FBLA's Competitive Events and their examples"
+				></meta>
 			</Head>
 			<CssBaseline>
 				<div className={classes.root}>

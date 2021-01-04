@@ -14,9 +14,11 @@ import {
 	Paper,
 	Chip,
 	Grid,
+	Tooltip,
 } from "@material-ui/core";
 import firebase from "../utils/firebase";
 import parseParticipantType from "../helper/parseParticipantType";
+import customStrings from "../helper/customStrings";
 
 const useStyles = makeStyles({
 	table: {
@@ -36,7 +38,11 @@ function createData(name, friendlyName, type, category) {
 	displayType.push(
 		type.map((currentType) => (
 			<Grid key={currentType} item>
-				<Chip label={currentType} />
+				<Tooltip
+					title={customStrings.participantType[currentType.toLowerCase()] || ""}
+				>
+					<Chip label={currentType} />
+				</Tooltip>
 			</Grid>
 		))
 	);

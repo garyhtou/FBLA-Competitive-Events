@@ -12,6 +12,9 @@ import firebase from "../utils/firebase";
 import EventHeader from "../components/eventHeader";
 import EventSidebar from "../components/eventSidebar";
 import parseParticipantType from "../helper/parseParticipantType";
+import EventGuidelines from "../components/eventGuidelines";
+import EventCompetencies from "../components/eventCompetencies";
+import EventTopicCase from "../components/eventTopicCase";
 
 export default function Event({ event, category }) {
 	return (
@@ -20,16 +23,22 @@ export default function Event({ event, category }) {
 				<title>{event.friendlyName} - FBLA Competitive Events</title>
 			</Head>
 			<Grid container spacing={5}>
-				<Grid item xs={8}>
+				<Grid item md={8}>
 					<EventHeader event={event} category={category} />
-					<Box marginTop={5}>
+					<EventTopicCase event={event} category={category} />
+
+					<Box marginTop={7}>
 						<Typography variant="h4" gutterBottom>
 							Overview
 						</Typography>
 						<Typography variant="body1">{category.overview}</Typography>
 					</Box>
+
+					<EventCompetencies event={event} category={category} />
+
+					<EventGuidelines event={event} category={category} />
 				</Grid>
-				<Grid item xs={4}>
+				<Grid item md={4}>
 					<EventSidebar event={event} category={category} />
 				</Grid>
 			</Grid>
