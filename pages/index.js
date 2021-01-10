@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import styles from "../styles/Home.module.css";
@@ -16,7 +17,8 @@ import {
 	Grid,
 	Tooltip,
 } from "@material-ui/core";
-import firebase from "../utils/firebase";
+import { Skeleton } from "@material-ui/lab";
+import firebaseClient from "../utils/firebaseClient";
 import parseParticipantType from "../helper/parseParticipantType";
 import customStrings from "../helper/customStrings";
 
@@ -51,12 +53,53 @@ function createData(name, friendlyName, type, category) {
 			{displayType}
 		</Grid>
 	);
-	console.log(displayType);
 
 	return { name, nameElement, type: displayType, category };
 }
 
-export default function Home({ events }) {
+export default function Home() {
+	const [events, setEvents] = useState([]);
+	const [eventsLoading, setEventsLoading] = useState(true);
+
+	useEffect(() => {
+		const unsub = firebaseClient
+			.database()
+			.ref("competitiveEvents/")
+			.on("value", (snapshot) => {
+				if (snapshot && snapshot.exists()) {
+					const snapshotEvents = snapshot.val().events;
+					const snapshotCategories = snapshot.val().categories;
+
+					var eventsList = [];
+
+					for (let event of Object.keys(snapshotEvents)) {
+						let eventObj = snapshotEvents[event];
+
+						let participantType = parseParticipantType(
+							eventObj.participantType
+						);
+						let eventCategory =
+							snapshotCategories[eventObj.category].friendlyName ||
+							eventObj.category ||
+							eventObj.friendlyName ||
+							event;
+
+						eventsList.push({
+							name: event,
+							friendlyName: eventObj.friendlyName || event,
+							type: participantType,
+							category: eventCategory,
+						});
+					}
+
+					setEvents(eventsList);
+					setEventsLoading(false);
+				}
+			});
+
+		return () => unsub();
+	}, []);
+
 	const classes = useStyles();
 
 	const rows = [];
@@ -65,6 +108,17 @@ export default function Home({ events }) {
 			createData(event.name, event.friendlyName, event.type, event.category)
 		);
 	});
+
+	if (eventsLoading) {
+		[...Array(10).keys()].map((loop) =>
+			rows.push({
+				name: loop,
+				nameElement: <Skeleton variant="text" />,
+				type: <Skeleton variant="text" />,
+				category: <Skeleton variant="text" />,
+			})
+		);
+	}
 
 	return (
 		<>
@@ -93,40 +147,4 @@ export default function Home({ events }) {
 			</TableContainer>
 		</>
 	);
-}
-
-export async function getServerSideProps(context) {
-	const snapshot = await firebase
-		.database()
-		.ref("competitiveEvents")
-		.once("value");
-
-	const snapshotEvents = snapshot.val().events;
-	const snapshotCategories = snapshot.val().categories;
-
-	var events = [];
-
-	for (let event of Object.keys(snapshotEvents)) {
-		let eventObj = snapshotEvents[event];
-
-		let participantType = parseParticipantType(eventObj.participantType);
-		let eventCategory =
-			snapshotCategories[eventObj.category].friendlyName ||
-			eventObj.category ||
-			eventObj.friendlyName ||
-			event;
-
-		events.push({
-			name: event,
-			friendlyName: eventObj.friendlyName || event,
-			type: participantType,
-			category: eventCategory,
-		});
-	}
-
-	// console.log(events);
-
-	return {
-		props: { events },
-	};
 }

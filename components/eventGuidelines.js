@@ -14,6 +14,7 @@ import {
 	AccordionDetails,
 } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
+import { Skeleton } from "@material-ui/lab";
 
 const useStyles = makeStyles({
 	guidelineTitles: {
@@ -36,7 +37,7 @@ function guidelineBody(intro, bullets) {
 				<Typography variant="body1">
 					<ul>
 						{bullets.map((bullet) => (
-							<li>{bullet}</li>
+							<li key={bullet}>{bullet}</li>
 						))}
 					</ul>
 				</Typography>
@@ -85,15 +86,24 @@ function processGuidelines(guidelines, isSpecificGuideline) {
 	}
 }
 
-export default function EventGuidelines({ event, category }) {
+export default function EventGuidelines({
+	event,
+	eventLoading,
+	category,
+	catLoading,
+}) {
 	const classes = useStyles();
 
 	var guidelines = [];
-	if (typeof category.guidelines !== "undefined") {
+	if (!catLoading && typeof category.guidelines !== "undefined") {
 		guidelines.push(...processGuidelines(category.guidelines, false));
 	}
-	if (typeof event.specificGuidelines !== "undefined") {
+	if (!eventLoading && typeof event.specificGuidelines !== "undefined") {
 		guidelines.push(...processGuidelines(event.specificGuidelines, true));
+	}
+
+	if (!catLoading && !eventLoading && guidelines.length === 0) {
+		return null;
 	}
 
 	return (
@@ -102,34 +112,47 @@ export default function EventGuidelines({ event, category }) {
 				<Typography variant="h4" gutterBottom>
 					Guidelines
 				</Typography>
-				{guidelines.length > 2 ? (
+				{!catLoading && !eventLoading ? (
 					<>
-						<Box>
-							{guidelines.map((guideline) => (
-								<Accordion key={guideline.key}>
-									<AccordionSummary expandIcon={<ExpandMore />}>
-										<Typography>
-											<Box className={classes.guidelineTitles}>
-												{guideline.title}
-											</Box>
+						{guidelines.length > 2 ? (
+							<>
+								<Box>
+									{guidelines.map((guideline) => (
+										<Accordion key={guideline.key}>
+											<AccordionSummary expandIcon={<ExpandMore />}>
+												<Typography>
+													<Box className={classes.guidelineTitles}>
+														{guideline.title}
+													</Box>
+												</Typography>
+											</AccordionSummary>
+											<AccordionDetails>{guideline.body}</AccordionDetails>
+										</Accordion>
+									))}
+								</Box>
+							</>
+						) : (
+							<>
+								{guidelines.map((guideline) => (
+									<Box marginBottom={3} key={guideline.key}>
+										<Typography variant="h6" gutterBottom>
+											{guideline.title}
 										</Typography>
-									</AccordionSummary>
-									<AccordionDetails>{guideline.body}</AccordionDetails>
-								</Accordion>
-							))}
-						</Box>
+										<Typography>{guideline.body}</Typography>
+									</Box>
+								))}
+							</>
+						)}
 					</>
 				) : (
-					<>
-						{guidelines.map((guideline) => (
-							<Box marginBottom={3} key={guideline.key}>
-								<Typography variant="h6" gutterBottom>
-									{guideline.title}
-								</Typography>
-								<Typography>{guideline.body}</Typography>
-							</Box>
-						))}
-					</>
+					<Box marginBottom={3}>
+						<Typography variant="h6" gutterBottom>
+							<Skeleton />
+						</Typography>
+						<Typography>
+							<Skeleton />
+						</Typography>
+					</Box>
 				)}
 			</Box>
 		</>

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import {
@@ -9,7 +10,9 @@ import {
 	CardContent,
 	Paper,
 } from "@material-ui/core";
-import firebase from "../utils/firebase";
+import { Skeleton } from "@material-ui/lab";
+import firebaseServer from "../utils/firebaseServer";
+import firebaseClient from "../utils/firebaseClient";
 import EventHeader from "../components/eventHeader";
 import EventSidebar from "../components/eventSidebar";
 import parseParticipantType from "../helper/parseParticipantType";
@@ -18,7 +21,47 @@ import EventCompetencies from "../components/eventCompetencies";
 import EventTopicCase from "../components/eventTopicCase";
 import EventFiles from "../components/eventFiles";
 
-export default function Event({ event, category }) {
+export default function Event({ initEvent }) {
+	const [event, setEvent] = useState(initEvent);
+	const [eventLoading, setEventLoading] = useState(true);
+	const [category, setCategory] = useState();
+	const [catLoading, setCatLoading] = useState(true);
+
+	useEffect(() => {
+		if (!eventLoading && typeof event.category !== "undefined") {
+			const unsub = firebaseClient
+				.database()
+				.ref("competitiveEvents/categories/" + event.category)
+				.on("value", (snapshot) => {
+					if (snapshot && snapshot.exists()) {
+						setCategory(snapshot.val());
+						setCatLoading(false);
+					}
+				});
+
+			return () => unsub();
+		}
+	}, [eventLoading, event.category]);
+
+	useEffect(() => {
+		const unsub = firebaseClient
+			.database()
+			.ref("competitiveEvents/events/" + initEvent.name)
+			.on("value", (snapshot) => {
+				if (snapshot && snapshot.exists()) {
+					let modifiedEvent = snapshot.val();
+					modifiedEvent.name = initEvent.name;
+					modifiedEvent.participantType = parseParticipantType(
+						modifiedEvent.participantType
+					);
+					setEvent(modifiedEvent);
+					setEventLoading(false);
+				}
+			});
+
+		return () => unsub();
+	}, []);
+
 	return (
 		<>
 			<Head>
@@ -26,24 +69,65 @@ export default function Event({ event, category }) {
 			</Head>
 			<Grid container spacing={5}>
 				<Grid item md={8}>
-					<EventHeader event={event} category={category} />
-					<EventTopicCase event={event} category={category} />
+					<EventHeader
+						event={event}
+						eventLoading={eventLoading}
+						category={category}
+						catLoading={catLoading}
+					/>
+					<EventTopicCase
+						event={event}
+						eventLoading={eventLoading}
+						category={category}
+						catLoading={catLoading}
+					/>
 
 					<Box marginTop={7}>
 						<Typography variant="h4" gutterBottom>
 							Overview
 						</Typography>
-						<Typography variant="body1">{category.overview}</Typography>
+						<Typography variant="body1">
+							{!catLoading ? category.overview : <Skeleton />}
+						</Typography>
 					</Box>
 
-					<EventCompetencies event={event} category={category} />
+					<EventCompetencies
+						event={event}
+						eventLoading={eventLoading}
+						category={category}
+						catLoading={catLoading}
+					/>
 
-					<EventGuidelines event={event} category={category} />
+					<EventGuidelines
+						event={event}
+						eventLoading={eventLoading}
+						category={category}
+						catLoading={catLoading}
+					/>
 
-					<EventFiles event={event} category={category} />
+					<EventFiles
+						event={event}
+						eventLoading={eventLoading}
+						category={category}
+						catLoading={catLoading}
+						type="resources"
+					/>
+
+					<EventFiles
+						event={event}
+						eventLoading={eventLoading}
+						category={category}
+						catLoading={catLoading}
+						type="examples"
+					/>
 				</Grid>
 				<Grid item md={4}>
-					<EventSidebar event={event} category={category} />
+					<EventSidebar
+						event={event}
+						eventLoading={eventLoading}
+						category={category}
+						catLoading={catLoading}
+					/>
 				</Grid>
 			</Grid>
 		</>
@@ -52,24 +136,17 @@ export default function Event({ event, category }) {
 
 export async function getServerSideProps(context) {
 	const eventName = String(context.req.url).substring(1).toLowerCase();
-	const snapshotEvent = await firebase
+	const snapshotEvent = await firebaseServer
 		.database()
-		.ref("competitiveEvents/events/" + eventName)
+		.ref("competitiveEvents/events/" + eventName + "/friendlyName")
 		.once("value");
 
-	if (snapshotEvent.exists()) {
-		const snapshotCategory = await firebase
-			.database()
-			.ref("competitiveEvents/categories/" + snapshotEvent.val().category)
-			.once("value");
-
-		let modifiedEvent = snapshotEvent.val();
-		modifiedEvent.name = eventName;
-		modifiedEvent.participantType = parseParticipantType(
-			modifiedEvent.participantType
-		);
+	if (typeof snapshotEvent !== "undefined" && snapshotEvent.exists()) {
+		let shallowEvent = {};
+		shallowEvent.name = eventName;
+		shallowEvent.friendlyName = snapshotEvent.val();
 		return {
-			props: { event: modifiedEvent, category: snapshotCategory.val() },
+			props: { initEvent: shallowEvent },
 		};
 	} else {
 		//for 404 display

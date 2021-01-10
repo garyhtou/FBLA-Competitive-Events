@@ -1,6 +1,5 @@
 import firebase from "firebase/app";
 import "firebase/database";
-import "firebase/analytics";
 
 if (!firebase.apps.length) {
 	firebase.initializeApp({

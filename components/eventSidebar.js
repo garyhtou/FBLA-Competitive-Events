@@ -1,18 +1,15 @@
 import Link from "next/link";
 import {
 	Typography,
-	Link as MuiLink,
-	Chip,
 	Grid,
 	Card,
 	CardContent,
 	makeStyles,
 	Box,
-	CardHeader,
 	Slide,
 	Fade,
-	duration,
 } from "@material-ui/core";
+import { Skeleton } from "@material-ui/lab";
 
 const useStyles = makeStyles({
 	cards: {
@@ -26,17 +23,24 @@ const useStyles = makeStyles({
 	},
 });
 
-export default function EventSidebar({ event, category }) {
+export default function EventSidebar({
+	event,
+	eventLoading,
+	category,
+	catLoading,
+}) {
 	const classes = useStyles();
 
+	const loading = typeof category === "undefined";
+
 	var cards = [
-		{ title: "Eligibility", body: category.eligibility },
-		{ title: "NLC Registration", body: category.nlcReg },
-		{ title: "Finals", body: category.finals },
+		{ title: "Eligibility", body: !catLoading ? category.eligibility : "" },
+		{ title: "NLC Registration", body: !catLoading ? category.nlcReg : "" },
+		{ title: "Finals", body: !catLoading ? category.finals : "" },
 	];
 
 	let times = [];
-	if (typeof event.timeLimits !== "undefined") {
+	if (!eventLoading && typeof event.timeLimits !== "undefined") {
 		for (let time of Object.keys(event.timeLimits)) {
 			let timeObj = event.timeLimits[time];
 			times.push({
@@ -60,7 +64,7 @@ export default function EventSidebar({ event, category }) {
 						</li>
 					) : (
 						<>
-							<Box fontWeight="bold" display="inline">
+							<Box fontWeight="bold" display="inline" key={time.friendlyName}>
 								{time.friendlyName}:
 							</Box>{" "}
 							{time.amount}
@@ -77,22 +81,33 @@ export default function EventSidebar({ event, category }) {
 				<div>
 					<Fade in={true} timeout={1500}>
 						<Grid container spacing={3} className={classes.stickyGrid}>
-							{cards.map((card) =>
-								card.body !== "undefined" && card.body !== "" ? (
-									<Grid item className={classes.cards}>
-										<Card elevation={3}>
-											<CardContent>
-												<Typography variant="h5" gutterBottom color="primary">
-													{card.title}
-												</Typography>
-												<Typography varient="body2" component="p">
-													{card.body}
-												</Typography>
-											</CardContent>
-										</Card>
-									</Grid>
-								) : null
-							)}
+							{cards.map((card) => (
+								<>
+									{catLoading ||
+									(card.body !== "undefined" && card.body !== "") ? (
+										<Grid item className={classes.cards} key={card.title}>
+											<Card elevation={3}>
+												<CardContent>
+													<Typography variant="h5" gutterBottom color="primary">
+														{card.title}
+													</Typography>
+													<Typography varient="body2" component="p">
+														{catLoading ? (
+															<>
+																<Skeleton />
+																<Skeleton />
+																<Skeleton />
+															</>
+														) : (
+															card.body
+														)}
+													</Typography>
+												</CardContent>
+											</Card>
+										</Grid>
+									) : null}
+								</>
+							))}
 						</Grid>
 					</Fade>
 				</div>

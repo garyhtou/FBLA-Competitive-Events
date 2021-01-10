@@ -19,12 +19,18 @@ const useStyles = makeStyles({
 	//
 });
 
-export default function EventTopicCase({ event, category }) {
+export default function EventTopicCase({
+	event,
+	eventLoading,
+	category,
+	catLoading,
+}) {
 	const classes = useStyles();
 
 	return (
 		<>
-			{typeof event.topic !== "undefined" &&
+			{!eventLoading &&
+			typeof event.topic !== "undefined" &&
 			((typeof event.topic.intro !== "undefined" && event.topic.intro !== "") ||
 				(typeof event.topic[0] !== "undefined" && event.topic[0] !== "")) ? (
 				<Box marginTop={3}>
@@ -46,7 +52,7 @@ export default function EventTopicCase({ event, category }) {
 					) : null}
 				</Box>
 			) : null}
-			{typeof event.case !== "undefined" ? (
+			{!eventLoading && typeof event.case !== "undefined" ? (
 				<Box marginTop={3}>
 					<Typography variant="body1" gutterBottom>
 						<Box fontWeight="bold" display="inline-block">
@@ -56,58 +62,6 @@ export default function EventTopicCase({ event, category }) {
 					</Typography>
 				</Box>
 			) : null}
-		</>
-	);
-
-	if (typeof event.case !== "undefined") {
-	} else if (typeof event.topic !== "undefined") {
-	} else {
-		return null;
-	}
-
-	return (
-		<>
-			{competencies.map((type) => (
-				<Box marginTop={5} key={type.key}>
-					<Typography variant="h4" gutterBottom>
-						{type.title}
-					</Typography>
-					<Box>
-						{type.sections.map((section) => (
-							<Accordion key={section.key}>
-								<AccordionSummary expandIcon={<ExpandMore />}>
-									<Typography>
-										<Box className={classes.competencySectionTitle}>
-											{section.title}
-										</Box>
-									</Typography>
-									<Box className={classes.competencySectionMinimum}>
-										<Typography>
-											<Box>
-												{typeof section.minimum !== "undefined" &&
-												section.minimum !== ""
-													? "Minimum: " + section.minimum
-													: null}
-											</Box>
-										</Typography>
-									</Box>
-								</AccordionSummary>
-								<AccordionDetails>
-									{section.tasks.length > 1 ? (
-										<ol>
-											{section.tasks.map((task) => (
-												<li key={task}>{task}</li>
-											))}
-										</ol>
-									) : (
-										<Typography>Whoops! Tasks not found...</Typography>
-									)}
-								</AccordionDetails>
-							</Accordion>
-						))}
-					</Box>
-				</Box>
-			))}
 		</>
 	);
 }

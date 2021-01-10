@@ -74,18 +74,65 @@ function processCompetencies(competencies) {
 	return competenciesList;
 }
 
-export default function EventCompetencies({ event, category }) {
+export default function EventCompetencies({
+	event,
+	eventLoading,
+	category,
+	catLoading,
+}) {
 	const classes = useStyles();
 
-	if (typeof event.competencies === "undefined") {
+	if (eventLoading || typeof event.competencies === "undefined") {
 		return null;
 	}
-
 	var competencies = processCompetencies(event.competencies);
 
 	return (
 		<>
-			{competencies.map((type) => (
+			{!eventLoading ? (
+				<>
+					{competencies.map((type) => (
+						<Box marginTop={5} key={type.key}>
+							<Typography variant="h4" gutterBottom>
+								{type.title}
+							</Typography>
+							<Box>
+								{type.sections.map((section) => (
+									<Accordion key={section.key}>
+										<AccordionSummary expandIcon={<ExpandMore />}>
+											<Typography
+												className={classes.competencySectionTitleGrow}
+											>
+												<Box className={classes.competencySectionTitle}>
+													{section.title}
+												</Box>
+											</Typography>
+
+											<Typography>
+												{typeof section.minimum !== "undefined" &&
+												section.minimum !== ""
+													? "Minimum: " + section.minimum
+													: null}
+											</Typography>
+										</AccordionSummary>
+										<AccordionDetails>
+											{section.tasks.length > 1 ? (
+												<ol>
+													{section.tasks.map((task) => (
+														<li key={task}>{task}</li>
+													))}
+												</ol>
+											) : (
+												<Typography>Whoops! Tasks not found...</Typography>
+											)}
+										</AccordionDetails>
+									</Accordion>
+								))}
+							</Box>
+						</Box>
+					))}
+				</>
+			) : (
 				<Box marginTop={5} key={type.key}>
 					<Typography variant="h4" gutterBottom>
 						{type.title}
@@ -124,7 +171,7 @@ export default function EventCompetencies({ event, category }) {
 						))}
 					</Box>
 				</Box>
-			))}
+			)}
 		</>
 	);
 }
