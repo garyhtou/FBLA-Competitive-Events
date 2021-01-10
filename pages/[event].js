@@ -57,7 +57,7 @@ export default function Event(/*{ initEvent }*/) {
 					);
 					setEvent(modifiedEvent);
 					setEventLoading(false);
-				} else {
+				} else if (snapshot && !snapshot.exists()) {
 					window.location.replace(
 						window.location.protocol + "//" + window.location.host + "/404"
 					);
