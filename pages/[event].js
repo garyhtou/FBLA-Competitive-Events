@@ -21,8 +21,8 @@ import EventCompetencies from "../components/eventCompetencies";
 import EventTopicCase from "../components/eventTopicCase";
 import EventFiles from "../components/eventFiles";
 
-export default function Event({ initEvent }) {
-	const [event, setEvent] = useState(initEvent);
+export default function Event(/*{ initEvent }*/) {
+	const [event, setEvent] = useState({});
 	const [eventLoading, setEventLoading] = useState(true);
 	const [category, setCategory] = useState();
 	const [catLoading, setCatLoading] = useState(true);
@@ -44,18 +44,23 @@ export default function Event({ initEvent }) {
 	}, [eventLoading, event.category]);
 
 	useEffect(() => {
+		const eventName = window.location.pathname.substring(1).toLowerCase();
 		const unsub = firebaseClient
 			.database()
-			.ref("competitiveEvents/events/" + initEvent.name)
+			.ref("competitiveEvents/events/" + eventName)
 			.on("value", (snapshot) => {
 				if (snapshot && snapshot.exists()) {
 					let modifiedEvent = snapshot.val();
-					modifiedEvent.name = initEvent.name;
+					modifiedEvent.name = eventName;
 					modifiedEvent.participantType = parseParticipantType(
 						modifiedEvent.participantType
 					);
 					setEvent(modifiedEvent);
 					setEventLoading(false);
+				} else {
+					window.location.replace(
+						window.location.protocol + "//" + window.location.host + "/404"
+					);
 				}
 			});
 
@@ -134,30 +139,31 @@ export default function Event({ initEvent }) {
 	);
 }
 
-export async function getServerSideProps(context) {
-	const eventName = String(context.req.url).substring(1).toLowerCase();
-	if (
-		![".", "#", "$", "[", "]"].every(
-			(item) => eventName.split().indexOf(item) === -1
-		)
-	) {
-		return { props: { path: context.req.url }, notFound: true };
-	}
+// export async function getServerSideProps(context) {
+// 	const eventName = String(context.req.url).substring(1).toLowerCase();
+// 	if (
+// 		![".", "#", "$", "[", "]"].every(
+// 			(item) => eventName.split().indexOf(item) === -1
+// 		)
+// 	) {
+// 		console.log("REJECTED");
+// 		return { props: { path: context.req.url }, notFound: true };
+// 	}
 
-	const snapshotEvent = await firebaseServer
-		.database()
-		.ref("competitiveEvents/events/" + eventName + "/friendlyName")
-		.once("value");
+// 	const snapshotEvent = await firebaseServer
+// 		.database()
+// 		.ref("competitiveEvents/events/" + eventName + "/friendlyName")
+// 		.once("value");
 
-	if (typeof snapshotEvent !== "undefined" && snapshotEvent.exists()) {
-		let shallowEvent = {};
-		shallowEvent.name = eventName;
-		shallowEvent.friendlyName = snapshotEvent.val();
-		return {
-			props: { initEvent: shallowEvent },
-		};
-	} else {
-		//for 404 display
-		return { props: { path: context.req.url }, notFound: true };
-	}
-}
+// 	if (typeof snapshotEvent !== "undefined" && snapshotEvent.exists()) {
+// 		let shallowEvent = {};
+// 		shallowEvent.name = eventName;
+// 		shallowEvent.friendlyName = snapshotEvent.val();
+// 		return {
+// 			props: { initEvent: shallowEvent },
+// 		};
+// 	} else {
+// 		//for 404 display
+// 		return { props: { path: context.req.url }, notFound: true };
+// 	}
+// }
