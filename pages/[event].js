@@ -136,6 +136,14 @@ export default function Event({ initEvent }) {
 
 export async function getServerSideProps(context) {
 	const eventName = String(context.req.url).substring(1).toLowerCase();
+	if (
+		![".", "#", "$", "[", "]"].every(
+			(item) => eventName.split().indexOf(item) === -1
+		)
+	) {
+		return { props: { path: context.req.url }, notFound: true };
+	}
+
 	const snapshotEvent = await firebaseServer
 		.database()
 		.ref("competitiveEvents/events/" + eventName + "/friendlyName")
