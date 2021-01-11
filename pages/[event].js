@@ -73,7 +73,12 @@ export default function Event(/*{ initEvent }*/) {
 				{eventLoading ? (
 					<title>FBLA Competitive Events</title>
 				) : (
-					<title>{event.friendlyName} - FBLA Competitive Events</title>
+					<title>
+						{event.friendlyName || event.name
+							? `${event.friendlyName || event.name} - `
+							: null}
+						FBLA Competitive Events
+					</title>
 				)}
 			</Head>
 			<Grid container spacing={5}>
