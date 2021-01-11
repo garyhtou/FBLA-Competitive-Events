@@ -20,7 +20,11 @@ export default function EventHeader({
 		<>
 			<Box marginBottom={2}>
 				<Typography variant="h3" component="h1" gutterBottom>
-					{event.friendlyName || event.name}
+					{eventLoading ? (
+						<Skeleton />
+					) : (
+						<>{event.friendlyName || event.name}</>
+					)}
 				</Typography>
 				<Grid container spacing={1} alignItems="center">
 					<Grid item>

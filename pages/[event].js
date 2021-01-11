@@ -70,7 +70,11 @@ export default function Event(/*{ initEvent }*/) {
 	return (
 		<>
 			<Head>
-				<title>{event.friendlyName} - FBLA Competitive Events</title>
+				{eventLoading ? (
+					<title>FBLA Competitive Events</title>
+				) : (
+					<title>{event.friendlyName} - FBLA Competitive Events</title>
+				)}
 			</Head>
 			<Grid container spacing={5}>
 				<Grid item md={8}>
