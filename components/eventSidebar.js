@@ -84,7 +84,7 @@ export default function EventSidebar({
 							{cards.map((card) => (
 								<>
 									{catLoading ||
-									(card.body !== "undefined" && card.body !== "") ? (
+									(typeof card.body !== "undefined" && card.body !== "") ? (
 										<Grid item className={classes.cards} key={card.title}>
 											<Card elevation={3}>
 												<CardContent>
